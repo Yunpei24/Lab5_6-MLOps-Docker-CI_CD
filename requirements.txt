@@ -1,0 +1,26 @@
+numpy
+pandas
+scikit-learn
+matplotlib
+pytest
+requests
+fastapi
+uvicorn
+joblib
+python-dotenv
+httpx
+
+# docker exec 91f02fb89cbc env | grep API_KEY 
+# docker inspect 91f02fb89cbc | grep -i env -A 10
+# docker compose exec f30e834e0f46 ls -la /run/secrets/
+# docker run --env-file path_to_env_file_in_the_host -p 8000:8000 lab5-docker_web
+# docker cp ml-api-container:/run/secrets/api_key ./stolen/api_key.txt
+
+# # Voir où le secret est monté
+# docker exec ml-api ls -la /run/secrets/
+
+# Lire le contenu du secret (pour debug uniquement)
+# docker exec ml-api cat /run/secrets/api_key
+
+# Vérifier que le secret N'EST PAS dans les variables d'environnement
+# docker exec ml-api env | grep -i key

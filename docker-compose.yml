@@ -1,0 +1,25 @@
+services:
+  ml-api:
+    build: .
+    container_name: ml-api-container
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./app/models:/app/models:ro  # ro = read-only
+    secrets:
+      - api_key
+    environment:
+      - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health -H 'x-api-key: $(cat /run/secrets/api_key)' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+secrets:
+  api_key:
+    file: ./secrets/api_key.txt
