@@ -28,6 +28,6 @@ LOGISTIC_MODEL = os.getenv("LOGISTIC_MODEL", "/app/models/logistic_regression.pk
 RF_MODEL = os.getenv("RF_MODEL", "/app/models/random_forest.pkl")
 MODELS_DIR = os.getenv("MODELS_DIR", "/app/models")
 
-API_KEY = load_secret("api_key")
+API_KEY = load_secret("API_KEY")
 
  
