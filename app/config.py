@@ -4,6 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
 def load_secret(secret_name: str, default: str = None) -> str:
     """Load secret from file or environment variable."""
     # Fallback to environment variable

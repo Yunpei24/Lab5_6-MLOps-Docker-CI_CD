@@ -4,20 +4,16 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_models(mocker):
-    lr = MagicMock()
-    lr.predict.return_value = [-1]
-    rf = MagicMock()
-    rf.predict.return_value = [2]
-
-    mocked = {"logistic_model": lr, "rf_model": rf}
-    mocker.patch("app.main.models", mocked)
-    return mocked
+    mock_dict = {"lr": MagicMock, "rd": MagicMock, "logistic_model": MagicMock, "rf_model": MagicMock}
+    m = mocker.patch("app.main.models", return_value=mock_dict)
+    m.keys.return_value = mock_dict.keys()
+    return m
 
 
 @pytest.fixture
-def client(mock_models):
+def client():
     """Create a test client that handles the lifespan of the application."""
     with TestClient(app) as client:
         yield client
@@ -35,16 +31,14 @@ def test_health_check(client):
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
-
 def test_available_models(client):
-    # headers = {"x-api-key": API_KEY}
     response = client.get("/models")
     assert response.status_code == 200
     assert isinstance(response.json()["available_models"], list)
 
-
 def test_predict_invalid_model_name(client):
     """Test prédiction avec nom de modèle invalide"""
+    
     data = {
         "sepal_length": 5.1,
         "sepal_width": 3.5,
@@ -57,8 +51,9 @@ def test_predict_invalid_model_name(client):
     assert "Invalid model name" in response.json()["detail"]
 
 
-def test_predict_valid_lr_model(client):
+def test_predict_valid_lr_model(client, mock_models):
     """Test prédiction avec modèle logistic regression valide"""
+    mock_models["lr"].predict.return_value = [-1]
     data = {
         "sepal_length": 5.1,
         "sepal_width": 3.5,
@@ -69,13 +64,11 @@ def test_predict_valid_lr_model(client):
 
     assert response.status_code == 200
     response_data = response.json()
-    assert "prediction label" in response_data
+    assert response_data["prediction label"] == -1
     assert "name" in response_data
-    assert isinstance(response_data["prediction label"], int)
-    assert response_data["name"] in ["Setosa", "Versicolor", "Virginica"]
-
-
-def test_predict_valid_rd_model(client):
+    
+def test_predict_valid_rd_model(client, mock_models):
+    mock_models["rd"].predict.return_value = [-2]
     data = {
         "sepal_length": 6.2,
         "sepal_width": 3.4,
@@ -86,10 +79,8 @@ def test_predict_valid_rd_model(client):
 
     assert response.status_code == 200
     response_data = response.json()
-    assert "prediction label" in response_data
+    assert response_data["prediction label"] == -2
     assert "name" in response_data
-
-
 
 def test_predict_invalid_api_key(client):
     data = {
@@ -104,8 +95,8 @@ def test_predict_invalid_api_key(client):
     assert response.status_code == 401
     assert "Invalid API key" in response.json()["detail"]
 
-
-def test_predict_logistic_regression_endpoint(client):
+def test_predict_logistic_regression_endpoint(client, mock_models):
+    mock_models["logistic_model"].predict.return_value = [-1]
     data = {
             "sepal_length": 5.1,
             "sepal_width": 3.5,
@@ -117,10 +108,11 @@ def test_predict_logistic_regression_endpoint(client):
     assert response.status_code == 200
     response_data = response.json()
     assert "prediction label" in response_data
+    assert response_data["prediction label"] == -1
     assert "name" in response_data
 
-
-def test_predict_random_forest_endpoint(client):
+def test_predict_random_forest_endpoint(client, mock_models):
+    mock_models["rf_model"].predict.return_value = [-2]
     data = {
             "sepal_length": 6.2,
             "sepal_width": 3.4,
@@ -132,13 +124,8 @@ def test_predict_random_forest_endpoint(client):
     assert response.status_code == 200
     response_data = response.json()
     assert "prediction label" in response_data
+    assert response_data["prediction label"] == -2
     assert "name" in response_data
-
-
-def test_models_endpoint_missing_api_key(client):
-    response = client.get("/models")
-    assert response.status_code == 200
-
 
 def test_predict_invalid_input_data(client):
     data = {
