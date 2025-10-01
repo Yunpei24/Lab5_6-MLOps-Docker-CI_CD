@@ -1,12 +1,10 @@
 from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
-# from fastapi.testclient import TestClient
 import asyncio
-from .config import LOGISTIC_MODEL, RF_MODEL, MODELS_DIR
+from .config import LOGISTIC_MODEL, RF_MODEL
 from .auth import verify_api_key
 import joblib
-import os
 import numpy as np
 
 classes = ['Setosa', 'Versicolor', 'Virginica']
