@@ -24,10 +24,10 @@ def load_secret(secret_name: str, default: str = None) -> str:
     raise ValueError(f"Secret {secret_name} not found")
 
 # Configuration from environment variables
-LOGISTIC_MODEL = os.getenv("LOGISTIC_MODEL", "/app/models/logistic_regression.pkl")
-RF_MODEL = os.getenv("RF_MODEL", "/app/models/random_forest.pkl")
-MODELS_DIR = os.getenv("MODELS_DIR", "/app/models")
+LOGISTIC_MODEL = os.getenv("LOGISTIC_MODEL")
+RF_MODEL = os.getenv("RF_MODEL")
+MODELS_DIR = os.getenv("MODELS_DIR")
 
-API_KEY = load_secret("API_KEY")
+API_KEY = os.getenv("API_KEY") #load_secret("API_KEY")
 
  
