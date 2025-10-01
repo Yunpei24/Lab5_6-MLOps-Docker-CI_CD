@@ -28,6 +28,6 @@ LOGISTIC_MODEL = os.getenv("LOGISTIC_MODEL")
 RF_MODEL = os.getenv("RF_MODEL")
 MODELS_DIR = os.getenv("MODELS_DIR")
 
-API_KEY = os.getenv("API_KEY") #load_secret("API_KEY")
+API_KEY = load_secret("API_KEY")
 
  

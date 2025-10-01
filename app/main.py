@@ -13,6 +13,8 @@ classes = ['Setosa', 'Versicolor', 'Virginica']
 models = {}
 
 def load_model(path: str):
+    if not path:
+        return None
     model = None
     with open(path, "rb") as f:
         model = joblib.load(f)
