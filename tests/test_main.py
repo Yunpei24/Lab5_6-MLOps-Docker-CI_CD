@@ -39,11 +39,12 @@ def test_health_check(client):
     assert response.json() == {"status": "healthy"}
 
 
-def test_available_models(client):
-    headers = {"x-api-key": API_KEY}
-    response = client.get("/models", headers=headers)
-    assert response.status_code == 200
-    assert isinstance(response.json()["available_models"], list)
+def test_available_models():
+    with TestClient(app) as client:
+        headers = {"x-api-key": API_KEY}
+        response = client.get("/models", headers=headers)
+        assert response.status_code == 200
+        assert isinstance(response.json()["available_models"], list)
 
 
 def test_predict_invalid_model_name(client):
