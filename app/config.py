@@ -30,4 +30,4 @@ MODELS_DIR = os.getenv("MODELS_DIR")
 
 API_KEY = os.getenv("API_KEY")
 
- 
+print("CHECK ENV VAR:", LOGISTIC_MODEL, RF_MODEL, MODELS_DIR)
