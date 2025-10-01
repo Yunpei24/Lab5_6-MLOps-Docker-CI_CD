@@ -4,8 +4,9 @@ import os
 from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
-from app.config import API_KEY
+from app.config import LOGISTIC_MODEL, RF_MODEL, MODELS_DIR
 
+print("CHECK ENV VAR:", LOGISTIC_MODEL, RF_MODEL, MODELS_DIR)
 
 @pytest.fixture
 def mock_models(mocker):
