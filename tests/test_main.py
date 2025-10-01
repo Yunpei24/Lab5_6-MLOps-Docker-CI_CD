@@ -4,6 +4,7 @@ import os
 from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
+from app.config import API_KEY
 
 root_dir = os.path.dirname(os.path.dirname(__file__))
 if root_dir not in sys.path:
@@ -13,7 +14,7 @@ if root_dir not in sys.path:
 @pytest.fixture(scope="session", autouse=True)
 def mock_config():
     config_mock = MagicMock()
-    config_mock.API_KEY = "mysecretkey123"
+    config_mock.API_KEY = API_KEY
     config_mock.LOGISTIC_MODEL = "/app/models/logistic_regression.pkl"
     config_mock.RF_MODEL = "/app/models/random_forest.pkl"
     config_mock.MODELS_DIR = "/app/models"
@@ -68,7 +69,7 @@ def test_health_check(client):
 
 def test_available_models(client):
     """Test l'endpoint des modèles disponibles"""
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.get("/models", headers=headers)
     assert response.status_code == 200
     assert "available_models" in response.json()
@@ -83,7 +84,7 @@ def test_predict_invalid_model_name(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/predict/invalid_model", json=data, headers=headers)
     
     assert response.status_code == 400
@@ -98,7 +99,7 @@ def test_predict_valid_lr_model(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/predict/lr", json=data, headers=headers)
     
     assert response.status_code == 200
@@ -116,7 +117,7 @@ def test_predict_valid_rd_model(client):
         "petal_length": 5.4,
         "petal_width": 2.3
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/predict/rd", json=data, headers=headers)
     
     assert response.status_code == 200
@@ -159,7 +160,7 @@ def test_predict_logistic_regression_endpoint(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/prediction/logistic_reg", json=data, headers=headers)
     
     assert response.status_code == 200
@@ -175,7 +176,7 @@ def test_predict_random_forest_endpoint(client):
         "petal_length": 5.4,
         "petal_width": 2.3
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/prediction/random_forest", json=data, headers=headers)
     
     assert response.status_code == 200
@@ -196,7 +197,7 @@ def test_predict_invalid_input_data(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": "mysecretkey123"}
+    headers = {"x-api-key": API_KEY}
     response = client.post("/predict/lr", json=data, headers=headers)
     
     assert response.status_code == 422  # Erreur de validation
