@@ -25,20 +25,16 @@ class IrisData(BaseModel):
     petal_width: float = Field(default=1.0, ge=0, le=3, description="Petal width in cm (must be positive)")
 
 
-# class IrisInput(BaseModel):
-#     data: list[IrisFeatures] = Field(default=[], description="List of Iris observations for prediction")
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load model on startup
-    app.state.lr = load_model(LOGISTIC_MODEL)
-    app.state.rd = load_model(RF_MODEL)
     models["logistic_model"] = load_model(LOGISTIC_MODEL)
     models["rf_model"] = load_model(RF_MODEL)
 
     print("Models loaded successfully.")
     yield
     # Cleanup on shutdown (if needed)
+    models.clear()
     print("Shutting down...")
 
 app = FastAPI(lifespan=lifespan)
@@ -70,9 +66,9 @@ async def predict(input_data: IrisData, model_name: str, background_tasks: Backg
 
     await asyncio.sleep(1)
     if model_name == "lr":
-        model = app.state.lr
+        model = models["logistic_model"]
     elif model_name == "rd":
-        model = app.state.rd
+        model = models["rf_model"]
     else:
         raise HTTPException(status_code=400, detail="Invalid model name")
     features = [[input_data.sepal_length, input_data.sepal_width, input_data.petal_length, input_data.petal_width]]
@@ -98,7 +94,7 @@ async def predict_lr(input_data: IrisData, background_tasks: BackgroundTasks, ap
         raise HTTPException(status_code=403, detail="Forbidden")
     
     await asyncio.sleep(1)
-    model = app.state.lr
+    model = models["logistic_model"]
     features = [[input_data.sepal_length, input_data.sepal_width, input_data.petal_length, input_data.petal_width]]
     prediction = model.predict(np.array(features))
     name = classes[prediction[0]]
@@ -132,18 +128,8 @@ async def predict_rd(input_data: IrisData, background_tasks: BackgroundTasks, ap
 # Route to to list the models
 @app.get("/models")
 async def available_models(api_key_valid: bool = Depends(verify_api_key)):
-
     if not api_key_valid:
         raise HTTPException(status_code=403, detail="Forbidden")
-    # List available models files in the models directory if exists
-
-    # if os.path.exists(MODELS_DIR):
-    #     models = [f for f in os.listdir(MODELS_DIR) if f.endswith('.pkl')]
-    #     return {"models": models}
-    # else:
-    #     return {"models": []}
-    print(LOGISTIC_MODEL)
-    print(RF_MODEL)
     return {"available_models": list(models.keys())}
 
 

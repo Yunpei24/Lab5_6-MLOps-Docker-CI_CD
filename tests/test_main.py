@@ -1,56 +1,29 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.config import API_KEY
 
-root_dir = os.path.dirname(os.path.dirname(__file__))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def mock_config():
-    config_mock = MagicMock()
-    config_mock.API_KEY = API_KEY
-    config_mock.LOGISTIC_MODEL = "/app/models/logistic_regression.pkl"
-    config_mock.RF_MODEL = "/app/models/random_forest.pkl"
-    config_mock.MODELS_DIR = "/app/models"
-    
-    with patch.dict('sys.modules', {'app.config': config_mock}):
-        yield config_mock
-
-
-@pytest.fixture(autouse=True)
-def mock_joblib():
-    """Mock joblib.load pour éviter de charger de vrais modèles"""
-    with patch('joblib.load') as mock_load:
-        # Créer des modèles mockés
-        mock_lr_model = Mock()
-        mock_rf_model = Mock()
-        
-        # Configurer les prédictions mockées
-        mock_lr_model.predict.return_value = [0]  # Setosa
-        mock_rf_model.predict.return_value = [1]  # Versicolor
-        
-        def load_side_effect(*args, **kwargs):
-            path = str(args[0]) if args else ""
-            if 'logistic' in path:
-                return mock_lr_model
-            else:
-                return mock_rf_model
-        
-        mock_load.side_effect = load_side_effect
-        yield mock_load
 
 
 @pytest.fixture
-def client(mock_config, mock_joblib):
+def mock_models(mocker):
+    mock_dict = {"logistic_model": MagicMock, "rf_model": MagicMock}
+    m = mocker.patch(
+        "app.main.models",
+        return_value=mock_dict,
+    )
+    m.keys.return_value = mock_dict.keys()
+    return m
+
+
+@pytest.fixture
+def client(mock_models):
     """Create a test client that handles the lifespan of the application."""
-    with TestClient(app) as test_client:
-        yield test_client
+    with TestClient(app) as client:
+        yield client
 
 
 def test_read_main(client):
@@ -61,18 +34,15 @@ def test_read_main(client):
 
 
 def test_health_check(client):
-    """Test le health check"""
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
 
 def test_available_models(client):
-    """Test l'endpoint des modèles disponibles"""
     headers = {"x-api-key": API_KEY}
     response = client.get("/models", headers=headers)
     assert response.status_code == 200
-    assert "available_models" in response.json()
     assert isinstance(response.json()["available_models"], list)
 
 
@@ -93,6 +63,7 @@ def test_predict_invalid_model_name(client):
 
 def test_predict_valid_lr_model(client):
     """Test prédiction avec modèle logistic regression valide"""
+
     data = {
         "sepal_length": 5.1,
         "sepal_width": 3.5,

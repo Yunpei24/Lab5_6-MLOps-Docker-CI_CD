@@ -1,27 +1,27 @@
-name: Manual Dispatch with Inputs
+name: Hello Dispatch
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
-      message:
-        description: 'A message to print in the job'
+      name:
+        description: "Your name"
         required: true
-        default: 'Hello from manual dispatch!'
-        type: string
+        default: "Student"
       run_extra_step:
-        description: 'Run an additional step if true'
-        required: true
-        default: false
-        type: boolean
+        description: "Run the extra step? (true|false)"
+        required: false
+        default: "false"
 
 jobs:
-  manual-job:
+  hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Print the input message
-        run: echo "The received message is: ${{ github.event.inputs.message }}"
+      - name: Print inputs
+        run: |
+          echo "Hello, ${{ github.event.inputs.name }}!"
+          echo "Extra step: ${{ github.event.inputs.run_extra_step }}"
 
-      - name: Run additional step if selected
-        if: github.event.inputs.run_extra_step == 'true'
-        run: echo "The extra step was triggered!"
+      - name: Optional extra step
+        if: ${{ github.event.inputs.run_extra_step == 'true' }}
+        run: |
+          echo "Running the extra step because you asked for it."
