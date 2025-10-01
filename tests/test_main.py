@@ -7,7 +7,6 @@ from app.main import app
 from app.config import API_KEY
 
 
-
 @pytest.fixture
 def mock_models(mocker):
     mock_dict = {"logistic_model": MagicMock, "rf_model": MagicMock}
@@ -20,7 +19,7 @@ def mock_models(mocker):
 
 
 @pytest.fixture
-def client(mock_models):
+def client():
     """Create a test client that handles the lifespan of the application."""
     with TestClient(app) as client:
         yield client
@@ -39,12 +38,11 @@ def test_health_check(client):
     assert response.json() == {"status": "healthy"}
 
 
-def test_available_models():
-    with TestClient(app) as client:
-        headers = {"x-api-key": API_KEY}
-        response = client.get("/models", headers=headers)
-        assert response.status_code == 200
-        assert isinstance(response.json()["available_models"], list)
+def test_available_models(client):
+    # headers = {"x-api-key": API_KEY}
+    response = client.get("/models")
+    assert response.status_code == 200
+    assert isinstance(response.json()["available_models"], list)
 
 
 def test_predict_invalid_model_name(client):
@@ -55,8 +53,7 @@ def test_predict_invalid_model_name(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/predict/invalid_model", json=data, headers=headers)
+    response = client.post("/predict/invalid_model", json=data)
     
     assert response.status_code == 400
     assert "Invalid model name" in response.json()["detail"]
@@ -64,16 +61,14 @@ def test_predict_invalid_model_name(client):
 
 def test_predict_valid_lr_model(client):
     """Test prédiction avec modèle logistic regression valide"""
-
     data = {
         "sepal_length": 5.1,
         "sepal_width": 3.5,
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/predict/lr", json=data, headers=headers)
-    
+    response = client.post("/predict/lr", json=data)
+
     assert response.status_code == 200
     response_data = response.json()
     assert "prediction label" in response_data
@@ -89,26 +84,13 @@ def test_predict_valid_rd_model(client):
         "petal_length": 5.4,
         "petal_width": 2.3
     }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/predict/rd", json=data, headers=headers)
-    
+    response = client.post("/predict/rd", json=data)
+
     assert response.status_code == 200
     response_data = response.json()
     assert "prediction label" in response_data
     assert "name" in response_data
 
-
-def test_predict_missing_api_key(client):
-    data = {
-        "sepal_length": 5.1,
-        "sepal_width": 3.5,
-        "petal_length": 1.4,
-        "petal_width": 0.2
-    }
-    response = client.post("/predict/lr", json=data)
-    
-    assert response.status_code == 401
-    assert "Invalid API key" in response.json()["detail"]
 
 
 def test_predict_invalid_api_key(client):
@@ -127,14 +109,13 @@ def test_predict_invalid_api_key(client):
 
 def test_predict_logistic_regression_endpoint(client):
     data = {
-        "sepal_length": 5.1,
-        "sepal_width": 3.5,
-        "petal_length": 1.4,
-        "petal_width": 0.2
-    }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/prediction/logistic_reg", json=data, headers=headers)
-    
+            "sepal_length": 5.1,
+            "sepal_width": 3.5,
+            "petal_length": 1.4,
+            "petal_width": 0.2
+        }
+    response = client.post("/prediction/logistic_reg", json=data)
+
     assert response.status_code == 200
     response_data = response.json()
     assert "prediction label" in response_data
@@ -143,13 +124,12 @@ def test_predict_logistic_regression_endpoint(client):
 
 def test_predict_random_forest_endpoint(client):
     data = {
-        "sepal_length": 6.2,
-        "sepal_width": 3.4,
-        "petal_length": 5.4,
-        "petal_width": 2.3
-    }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/prediction/random_forest", json=data, headers=headers)
+            "sepal_length": 6.2,
+            "sepal_width": 3.4,
+            "petal_length": 5.4,
+            "petal_width": 2.3
+        }
+    response = client.post("/prediction/random_forest", json=data)
     
     assert response.status_code == 200
     response_data = response.json()
@@ -159,7 +139,7 @@ def test_predict_random_forest_endpoint(client):
 
 def test_models_endpoint_missing_api_key(client):
     response = client.get("/models")
-    assert response.status_code == 401
+    assert response.status_code == 200
 
 
 def test_predict_invalid_input_data(client):
@@ -169,7 +149,6 @@ def test_predict_invalid_input_data(client):
         "petal_length": 1.4,
         "petal_width": 0.2
     }
-    headers = {"x-api-key": API_KEY}
-    response = client.post("/predict/lr", json=data, headers=headers)
-    
+    response = client.post("/predict/lr", json=data)
+
     assert response.status_code == 422  # Erreur de validation

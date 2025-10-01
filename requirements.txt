@@ -10,6 +10,7 @@ joblib
 python-dotenv
 httpx
 pytest-mock
+pytest-asyncio
 fastapi[standard]
 
 # docker exec 91f02fb89cbc env | grep API_KEY 
