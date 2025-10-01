@@ -6,15 +6,15 @@ from dotenv import load_dotenv
 load_dotenv()
 def load_secret(secret_name: str, default: str = None) -> str:
     """Load secret from file or environment variable."""
-    # Try to read from Docker secret file first
-    secret_file = Path(f"/run/secrets/{secret_name}")
-    if secret_file.exists():
-        return secret_file.read_text().strip()
-    
     # Fallback to environment variable
     env_var = os.getenv(secret_name.upper(), default)
     if env_var:
         return env_var
+
+    # Try to read from Docker secret file first
+    secret_file = Path(f"/run/secrets/{secret_name}")
+    if secret_file.exists():
+        return secret_file.read_text().strip()
     
     # Final fallback to local secret file (for development)
     local_secret_file = Path(f"secrets/{secret_name}.txt")
