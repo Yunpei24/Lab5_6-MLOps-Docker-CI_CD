@@ -13,7 +13,7 @@ api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
 def verify_api_key(api_key: str = Depends(api_key_header)):
     if api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
-    return api_key
+    return True  # Return True instead of the key itself
 
 # Usage example in a FastAPI endpoint:
 # from fastapi import Depends

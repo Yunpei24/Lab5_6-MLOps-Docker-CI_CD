@@ -9,6 +9,8 @@ uvicorn
 joblib
 python-dotenv
 httpx
+pytest-mock
+fastapi[standard]
 
 # docker exec 91f02fb89cbc env | grep API_KEY 
 # docker inspect 91f02fb89cbc | grep -i env -A 10

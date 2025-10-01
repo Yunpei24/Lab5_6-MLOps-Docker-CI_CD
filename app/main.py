@@ -42,8 +42,7 @@ async def lifespan(app: FastAPI):
     print("Shutting down...")
 
 app = FastAPI(lifespan=lifespan)
-# Add security dependency to all routes
-app.dependency_overrides[Depends] = verify_api_key
+# Note: Remove the incorrect dependency override line
 
 @app.get("/health")
 async def health_check():
@@ -85,7 +84,7 @@ async def predict(input_data: IrisData, model_name: str, background_tasks: Backg
 
 
 # Route: Prediction using logistic_regression
-@app.post("/predict/logistic_reg")
+@app.post("/prediction/logistic_reg")
 async def predict_lr(input_data: IrisData, background_tasks: BackgroundTasks, api_key_valid: bool = Depends(verify_api_key)):
     """
     Prediction endpoint using logistic regression model.
@@ -108,7 +107,7 @@ async def predict_lr(input_data: IrisData, background_tasks: BackgroundTasks, ap
     return {"prediction label": int(prediction[0]), "name": name}
 
 # Route: Prediction using random_forest
-@app.post("/predict/random_forest")
+@app.post("/prediction/random_forest")
 async def predict_rd(input_data: IrisData, background_tasks: BackgroundTasks, api_key_valid: bool = Depends(verify_api_key)):
     """
     Prediction endpoint using random forest model.
@@ -122,7 +121,7 @@ async def predict_rd(input_data: IrisData, background_tasks: BackgroundTasks, ap
         raise HTTPException(status_code=403, detail="Forbidden")
     
     await asyncio.sleep(1)
-    model = app.state.rd
+    model = models["rf_model"]
     features = [[input_data.sepal_length, input_data.sepal_width, input_data.petal_length, input_data.petal_width]]
     prediction = model.predict(np.array(features))
     name = classes[prediction[0]]

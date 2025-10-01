@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 def load_secret(secret_name: str, default: str = None) -> str:
     """Load secret from file or environment variable."""
     # Try to read from Docker secret file first
