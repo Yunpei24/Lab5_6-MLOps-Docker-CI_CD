@@ -1,22 +1,19 @@
 import pytest
-import sys
-import os
 from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
-from app.config import LOGISTIC_MODEL, RF_MODEL, MODELS_DIR
 
-print("CHECK ENV VAR:", LOGISTIC_MODEL, RF_MODEL, MODELS_DIR)
 
 @pytest.fixture
 def mock_models(mocker):
-    mock_dict = {"logistic_model": MagicMock, "rf_model": MagicMock}
-    m = mocker.patch(
-        "app.main.models",
-        return_value=mock_dict,
-    )
-    m.keys.return_value = mock_dict.keys()
-    return m
+    lr = MagicMock()
+    lr.predict.return_value = [-1]
+    rf = MagicMock()
+    rf.predict.return_value = [2]
+
+    mocked = {"logistic_model": lr, "rf_model": rf}
+    mocker.patch("app.main.models", mocked)
+    return mocked
 
 
 @pytest.fixture
