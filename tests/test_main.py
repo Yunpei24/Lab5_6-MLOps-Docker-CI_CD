@@ -17,7 +17,7 @@ def mock_models(mocker):
 
 
 @pytest.fixture
-def client():
+def client(mock_models):
     """Create a test client that handles the lifespan of the application."""
     with TestClient(app) as client:
         yield client
