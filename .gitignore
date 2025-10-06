@@ -3,3 +3,5 @@ secrets/
 stolen/
 .dockerignore
 .env
+tests/__pycache__/
+app/__pycache__/

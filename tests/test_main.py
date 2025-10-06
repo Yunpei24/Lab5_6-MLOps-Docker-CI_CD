@@ -20,11 +20,9 @@ def client():
 
 
 def test_read_main(client):
-    """Test l'endpoint racine"""
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Hello World"}
-
 
 def test_health_check(client):
     response = client.get("/health")
@@ -37,8 +35,6 @@ def test_available_models(client):
     assert isinstance(response.json()["available_models"], list)
 
 def test_predict_invalid_model_name(client):
-    """Test prédiction avec nom de modèle invalide"""
-    
     data = {
         "sepal_length": 5.1,
         "sepal_width": 3.5,
@@ -50,9 +46,7 @@ def test_predict_invalid_model_name(client):
     assert response.status_code == 400
     assert "Invalid model name" in response.json()["detail"]
 
-
 def test_predict_valid_lr_model(client, mock_models):
-    """Test prédiction avec modèle logistic regression valide"""
     mock_models["lr"].predict.return_value = [-1]
     data = {
         "sepal_length": 5.1,

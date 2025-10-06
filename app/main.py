@@ -2,13 +2,18 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 import asyncio
-from .config import LOGISTIC_MODEL, RF_MODEL
+from .config import LOGISTIC_MODEL, RF_MODEL, IRIS_DATA, DATA_LOG
 from .auth import verify_api_key
 import joblib
 import numpy as np
 
 classes = ['Setosa', 'Versicolor', 'Virginica']
 models = {}
+
+# Create a function that logs (appends) needed feature/prediction variables to a global variable DATA_LOG.
+def log_data(features: dict, prediction: int):
+    with open(DATA_LOG, "a") as f:
+        f.write(f"Features: {features}, Prediction: {prediction}\n")
 
 def load_model(path: str):
     if not path:

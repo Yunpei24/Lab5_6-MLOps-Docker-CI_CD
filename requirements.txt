@@ -1,7 +1,8 @@
-numpy
+numpy==1.23.5
 pandas
 scikit-learn
 matplotlib
+seaborn
 pytest
 requests
 fastapi
@@ -12,6 +13,12 @@ httpx
 pytest-mock
 pytest-asyncio
 fastapi[standard]
+evidently
+alibi_detect
+pyOpenSSL==22.0.0
+
+contourpy==1.0.7
+scipy==1.10.1
 
 # docker exec 91f02fb89cbc env | grep API_KEY 
 # docker inspect 91f02fb89cbc | grep -i env -A 10

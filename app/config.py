@@ -27,6 +27,10 @@ def load_secret(secret_name: str, default: str = None) -> str:
 # Configuration from environment variables
 LOGISTIC_MODEL = os.getenv("LOGISTIC_MODEL")
 RF_MODEL = os.getenv("RF_MODEL")
-MODELS_DIR = os.getenv("MODELS_DIR")
 
-API_KEY = os.getenv("API_KEY")
+API_KEY = load_secret("API_KEY")
+
+
+# Load iris data ../data/iris.json
+IRIS_DATA = load_secret("IRIS_DATA")
+DATA_LOG = load_secret("DATA_LOG")
